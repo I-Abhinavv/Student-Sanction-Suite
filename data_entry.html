@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Entry Page</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+    #header {
+        background-color: #002643;
+        color: white;
+        padding: 10px;
+        display: flex;
+        align-items: center;
+    }
+    #header img {
+        width: 170px; 
+        height: 200px; 
+        margin-right: 20px;
+    }
+    #header .headings {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    #main-content {
+        padding: 20px;
+        text-align: center;
+    }
+    h1 {
+        margin-top: 0;
+        text-align: center;
+    }
+    #container {
+        max-width: 800px;
+        margin: 50px auto;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    th, td {
+        border: 1px solid #ccc;
+        padding: 8px;
+        text-align: left;
+    }
+    th {
+        background-color: #f2f2f2;
+    }
+    input[type="text"], select {
+        width: calc(100% - 230px); /* Adjust the width as needed */
+        padding: 5px;
+        box-sizing: border-box;
+        margin-bottom: 10px;
+    }
+    input[type="submit"] {
+        background-color: #002643;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    input[type="submit"]:hover {
+        background-color: #001e32;
+    }
+    label {
+        display: inline-block;
+        width: 200px; /* Adjust the width as needed */
+        text-align: right;
+        margin-right: 10px;
+    }
+</style>
+</head>
+<body>
+
+<div id="header">
+    <img src="college_logo.png" alt="College Logo">
+    <div class="headings">
+        <h1>MOTILAL NEHRU NATIONAL INSTITUTE OF TECHNOLOGY, ALLAHABAD</h1>
+        <h2>OFFICE OF CHIEF PROCTOR</h2>
+    </div>
+</div>
+
+<div id="main-content">
+    <h1>Data Entry Page</h1>
+
+    <div id="container">
+        <h2>Add Student</h2>
+        <form id="addStudentForm">
+            <label for="studentName">Student Name:</label>
+            <input type="text" id="studentName" name="studentName" required><br>
+            <label for="registrationNo">Registration No.:</label>
+            <input type="text" id="registrationNo" name="registrationNo" required><br>
+            <label for="batch">Batch:</label>
+            <select id="batch" name="batch" required>
+                <option value="">Select Batch</option>
+                <option value="Batch 2025">Batch 2025</option>
+                <option value="Batch 2026">Batch 2026</option>
+                <option value="Batch 2027">Batch 2027</option>
+                <option value="Batch 2028">Batch 2028</option>
+            </select><br>
+            <label for="blackDots">Number of Black Dots:</label>
+            <input type="text" id="blackDots" name="blackDots" required><br>
+            <label for="fine">Fine:</label>
+            <input type="text" id="fine" name="fine" required><br>
+            <label for="hostelDebarred">Hostel Debarred:</label>
+            <select id="hostelDebarred" name="hostelDebarred" required>
+                <option value="">Select</option>
+                <option value="true">Yes</option>
+                <option value="false">No</option>
+            </select><br>
+            <label for="messDebarred">Mess Debarred:</label>
+            <select id="messDebarred" name="messDebarred" required>
+                <option value="">Select</option>
+                <option value="true">Yes</option>
+                <option value="false">No</option>
+            </select><br>
+            <label for="punishmentReason">Punishment Reason:</label>
+            <input type="text" id="punishmentReason" name="punishmentReason" required><br>
+            <input type="submit" value="Add Student">
+        </form>
+
+        <h2>Student List</h2>
+        <table id="studentList">
+            <thead>
+                <tr>
+                    <th>Student Name</th>
+                    <th>Registration No.</th>
+                    <th>Batch</th>
+                    <th>Black Dots</th>
+                    <th>Fine</th>
+                    <th>Hostel Debarred</th>
+                    <th>Mess Debarred</th>
+                    <th>Punishment Reason</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="studentListBody">
+                <!-- Student data will be added dynamically here -->
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        fetchStudentList();
+    });
+
+    async function fetchStudentList() {
+        try {
+            const response = await fetch('/api/student-records');
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch student records');
+            }
+
+            const studentRecords = await response.json();
+            const studentListBody = document.getElementById('studentListBody');
+            studentListBody.innerHTML = ''; // Clear previous content
+
+            studentRecords.forEach(student => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${student.student_name}</td>
+                    <td>${student.registration_no}</td>
+                    <td>${student.batch}</td>
+                    <td>${student.black_dots}</td>
+                    <td>${student.fine}</td>
+                    <td>${student.hostel_debarred}</td>
+                    <td>${student.mess_debarred}</td>
+                    <td>${student.punishment_reason}</td>
+                    <td><button onclick="deleteStudent('${student.registration_no}')">Delete</button></td>
+                `;
+                studentListBody.appendChild(row);
+            });
+        } catch (error) {
+            console.error('Fetch student list error:', error.message);
+            alert('Failed to fetch student list. Please try again.');
+        }
+    }
+
+    async function deleteStudent(registrationNo) {
+        if (confirm('Are you sure you want to delete this student?')) {
+            try {
+                const response = await fetch(`/api/remove-student/${registrationNo}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to delete student');
+                }
+
+                alert('Student deleted successfully!');
+                fetchStudentList();
+            } catch (error) {
+                console.error('Delete student error:', error.message);
+                alert('Failed to delete student. Please try again.');
+            }
+        }
+    }
+
+    document.getElementById('addStudentForm').addEventListener('submit', async function(event) {
+        event.preventDefault();
+
+        const formData = new FormData(this);
+
+        try {
+            const response = await fetch('/api/add-student', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(Object.fromEntries(formData))
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to add student');
+            }
+
+            alert('Student added successfully!');
+            fetchStudentList();
+            this.reset(); // Clear form fields
+        } catch (error) {
+            console.error('Add student error:', error.message);
+            alert('Failed to add student. Please try again.');
+        }
+    });
+</script>
+
+
+</body>
+</html>
